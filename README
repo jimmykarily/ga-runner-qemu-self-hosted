@@ -1,0 +1,38 @@
+- Download a qcow image (https://cloud-images.ubuntu.com/jammy/current/):
+
+  E.g. https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-disk-kvm.img
+
+
+- Create a root password (https://askubuntu.com/questions/451673/default-username-password-for-ubuntu-cloud-image):
+  (You need: guestfs-tools)
+
+  ```
+  virt-customize -a jammy-server-cloudimg-amd64-disk-kvm.img --root-password password:<pass>
+  ```
+
+- Grow the disk (https://gist.github.com/joseluisq/2fcf26ff1b9c59fe998b4fbfcc388342):
+
+  ```
+  qemu-img create -f qcow2 -o preallocation=metadata newdisk.qcow2 50G
+  virt-resize --expand /dev/vda1 jammy-server-cloudimg-amd64-disk-kvm.img newdisk.qcow2 
+  ```
+
+- Run the image:
+
+  ```
+ ./start.sh newdisk.qcow2
+  ```
+
+- Fix boot (https://serverfault.com/a/976794):
+
+  ```
+  virt-rescue quest1-shrinked.qcow
+
+  mkdir /mnt
+  mount /dev/sda3 /mnt
+  mount --bind /dev /mnt/dev
+  mount --bind /proc /mnt/proc
+  mount --bind /sys /mnt/sys
+  chroot /mnt
+  grub-install /dev/sda
+  ```
