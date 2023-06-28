@@ -12,3 +12,6 @@ services:
       GH_TOKEN: ${GH_TOKEN}
       GH_OWNER: ${GH_OWNER}
       GH_REPOSITORY: ${GH_REPOSITORY}
+    privileged: true
+    devices:
+      - "dev/kvm:/dev/kvm"
