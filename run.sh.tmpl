@@ -1,19 +1,44 @@
 #!/bin/bash
 
-set -e
+set -e -x
 
 echo "Growing main partition"
 growpart /dev/vda 1 || true
+resize2fs /dev/vda1
 
 echo "Fixing network"
 dhclient
 
-export RUNNER_ALLOW_RUNASROOT=true
+setupDocker () {
+  for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
 
-echo "Starting the runner"
-mkdir -p actions-runner && cd actions-runner
-curl -o actions-runner-linux-x64-2.305.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.305.0/actions-runner-linux-x64-2.305.0.tar.gz
-echo "737bdcef6287a11672d6a5a752d70a7c96b4934de512b7eb283be6f51a563f2f  actions-runner-linux-x64-2.305.0.tar.gz" | shasum -a 256 -c
-tar xzf ./actions-runner-linux-x64-2.305.0.tar.gz
-./config.sh --unattended --replace --name $RUNNER_NAME --url $REPO_URL --token $TOKEN
-./run.sh
+  sudo apt-get update
+  sudo apt-get install -y ca-certificates curl gnupg
+
+  sudo install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/docker.gpg
+  sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+  echo \
+    "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+  sudo apt-get update
+  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+}
+
+startRunner () {
+  export RUNNER_ALLOW_RUNASROOT=true
+
+  echo "Starting the runner"
+  mkdir -p actions-runner && cd actions-runner
+  curl -o actions-runner-linux-x64-2.305.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.305.0/actions-runner-linux-x64-2.305.0.tar.gz
+  echo "737bdcef6287a11672d6a5a752d70a7c96b4934de512b7eb283be6f51a563f2f  actions-runner-linux-x64-2.305.0.tar.gz" | shasum -a 256 -c
+  tar xzf ./actions-runner-linux-x64-2.305.0.tar.gz
+  ./config.sh --unattended --ephemeral --replace --name $RUNNER_NAME --url $REPO_URL --token $TOKEN
+  ./run.sh
+}
+
+setupDocker
+#startRunner

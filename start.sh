@@ -5,8 +5,9 @@ set -e
 export CLOUD_IMAGE="https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-disk-kvm.img"
 export IMAGE_SIZE="${IMAGE_SIZE:-50000000000}" # Size in bytes (~50Gb)
 
+declare -a envVars=("TOKEN" "REPO_URL" "RUNNER_NAME" )
+
 checkDeps () {
-    declare -a envVars=("TOKEN" "REPO_URL" "RUNNER_NAME" )
     for var in ${envVars[@]}; do
         if [ -z "${!var}" ]; then
             echo "${var} environment variable not set"
@@ -70,7 +71,7 @@ growDisk() {
 # }
 
 copyFiles () {
-    cat run.sh.tmpl | envsubst > run.sh
+    cat run.sh.tmpl | envsubst "$(printf '$%q,' "${envVars[@]}")" > run.sh
     chmod +x run.sh
     virt-copy-in -a cloudImage.img run.sh /
     rm run.sh
