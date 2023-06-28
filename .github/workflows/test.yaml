@@ -1,0 +1,12 @@
+name: Test pipeline
+on:
+  pull_request:
+    paths:
+      - '**'
+
+jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+      - run: |
+          echo "This is a test"
