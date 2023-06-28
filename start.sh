@@ -45,31 +45,6 @@ growDisk() {
     qemu-img resize cloudImage.img ${IMAGE_SIZE}
 }
 
-# https://gist.github.com/joseluisq/2fcf26ff1b9c59fe998b4fbfcc388342
-# growDisk() {
-#     actualsize=$(wc -c <"cloudImage.img")
-#     if [ $actualsize -lt $IMAGE_SIZE ]; then
-#         qemu-img create -f qcow2 -o preallocation=metadata tmpDisk.img "${IMAGE_SIZE}"
-#         virt-resize --expand /dev/vda1 cloudImage.img tmpDisk.img
-#         mv tmpDisk.img cloudImage.img
-#     else
-#         echo "Image is already at the right size, no need to grow"
-#     fi
-# }
-
-# https://serverfault.com/a/976794
-# fixBoot () {
-#     echo "Fixing boot (https://serverfault.com/a/976794)"
-#     virt-rescue cloudImage.img <<<"
-#     sudo mount /dev/sda1 /mnt
-#     sudo mount --bind /dev /mnt/dev
-#     sudo mount --bind /proc /mnt/proc
-#     sudo mount --bind /sys /mnt/sys
-#     sudo chroot /mnt
-#     grub-install /dev/sda
-#     "
-# }
-
 copyFiles () {
     cat run.sh.tmpl | envsubst "$(printf '$%q,' "${envVars[@]}")" > run.sh
     chmod +x run.sh
@@ -102,7 +77,3 @@ createRootPassword
 growDisk
 copyFiles
 startVM
-
-# Need to run growpart /dev/vda 1
-#
-#fixBoot
