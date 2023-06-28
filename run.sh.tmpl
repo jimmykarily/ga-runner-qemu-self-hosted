@@ -6,13 +6,17 @@ echo "Growing main partition"
 growpart /dev/vda 1 || true
 resize2fs /dev/vda1
 
+export GH_TOKEN=$GH_TOKEN
+export GH_OWNER=$GH_OWNER
+export GH_REPOSITORY=$GH_REPOSITORY
+
 echo "Fixing network"
 dhclient
 
 setupDocker () {
-  for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
-
   sudo apt-get update
+  for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove -y $pkg; done
+
   sudo apt-get install -y ca-certificates curl gnupg
 
   sudo install -m 0755 -d /etc/apt/keyrings
@@ -29,16 +33,10 @@ setupDocker () {
 }
 
 startRunner () {
-  export RUNNER_ALLOW_RUNASROOT=true
-
   echo "Starting the runner"
-  mkdir -p actions-runner && cd actions-runner
-  curl -o actions-runner-linux-x64-2.305.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.305.0/actions-runner-linux-x64-2.305.0.tar.gz
-  echo "737bdcef6287a11672d6a5a752d70a7c96b4934de512b7eb283be6f51a563f2f  actions-runner-linux-x64-2.305.0.tar.gz" | shasum -a 256 -c
-  tar xzf ./actions-runner-linux-x64-2.305.0.tar.gz
-  ./config.sh --unattended --ephemeral --replace --name $RUNNER_NAME --url $REPO_URL --token $TOKEN
-  ./run.sh
+  cd /docker-compose
+  docker compose up --scale runner=$RUNNER_INSTANCES -d
 }
 
 setupDocker
-#startRunner
+startRunner

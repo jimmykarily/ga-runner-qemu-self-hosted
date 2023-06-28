@@ -5,7 +5,7 @@ set -e
 export CLOUD_IMAGE="https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-disk-kvm.img"
 export IMAGE_SIZE="${IMAGE_SIZE:-50000000000}" # Size in bytes (~50Gb)
 
-declare -a envVars=("TOKEN" "REPO_URL" "RUNNER_NAME" )
+declare -a envVars=("GH_TOKEN" "GH_REPOSITORY" "GH_OWNER" "RUNNER_INSTANCES")
 
 checkDeps () {
     for var in ${envVars[@]}; do
@@ -75,6 +75,7 @@ copyFiles () {
     chmod +x run.sh
     virt-copy-in -a cloudImage.img run.sh /
     rm run.sh
+    virt-copy-in -a cloudImage.img docker-compose /
 }
 
 startVM () {
