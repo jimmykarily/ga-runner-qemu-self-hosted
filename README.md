@@ -1,6 +1,6 @@
 This repository allows one to spin up GitHub Action runners inside a VM.
 The runners are ephemeral, meaning they only run one job and then exit and de-register and
-a new runner takes their place with not previous state saved anywhere.
+a new runner takes their place with no previous state saved anywhere.
 
 It is heavily inspired by:
 
