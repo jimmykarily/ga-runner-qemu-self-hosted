@@ -11,7 +11,10 @@ export RUNNER_ALLOW_RUNASROOT=true
 
 REG_TOKEN=$(curl -sX POST -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${GH_TOKEN}" https://api.github.com/repos/${GH_OWNER}/${GH_REPOSITORY}/actions/runners/registration-token | jq .token --raw-output)
 
-cd /root/actions-runner
+echo "Starting docker daemon"
+sudo dockerd &
+
+cd /home/runner/actions-runner
 
 ./config.sh --unattended --ephemeral --url https://github.com/${GH_OWNER}/${GH_REPOSITORY} --token ${REG_TOKEN} --name ${RUNNER_NAME}
 
@@ -22,5 +25,10 @@ cleanup() {
 
 trap 'cleanup; exit 130' INT
 trap 'cleanup; exit 143' TERM
+
+# Allow the "runner" user to access /dev/kvm
+# Might not be the best solution but adding to the kvm group didn't work
+# https://askubuntu.com/a/1081326
+sudo setfacl -m u:runner:rwx /dev/kvm
 
 ./run.sh & wait $!

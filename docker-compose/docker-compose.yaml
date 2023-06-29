@@ -14,4 +14,4 @@ services:
       GH_REPOSITORY: ${GH_REPOSITORY}
     privileged: true
     devices:
-      - "dev/kvm:/dev/kvm"
+      - "/dev/kvm:/dev/kvm"
