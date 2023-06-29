@@ -8,10 +8,12 @@ services:
       context: .
       args:
         RUNNER_VERSION: '2.305.0'
+    restart: always
     environment:
       GH_TOKEN: ${GH_TOKEN}
       GH_OWNER: ${GH_OWNER}
       GH_REPOSITORY: ${GH_REPOSITORY}
     privileged: true
+    cgroup: host
     devices:
       - "/dev/kvm:/dev/kvm"

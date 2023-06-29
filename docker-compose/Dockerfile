@@ -35,6 +35,8 @@ RUN echo \
     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 RUN apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+VOLUME /var/lib/docker
+
 USER runner
 
 # cd into the user directory, download and unzip the github actions runner
