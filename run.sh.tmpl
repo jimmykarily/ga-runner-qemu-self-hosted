@@ -35,7 +35,7 @@ setupDocker () {
 startRunner () {
   echo "Starting the runner"
   cd /docker-compose
-  docker compose up --scale runner=$RUNNER_INSTANCES -d
+  docker compose up --force-recreate --renew-anon-volumes --scale runner=$RUNNER_INSTANCES -d
 }
 
 setupDocker
