@@ -46,6 +46,7 @@ growDisk() {
 }
 
 copyFiles () {
+    echo "Copying files in the VM"
     cat run.sh.tmpl | envsubst "$(printf '$%q,' "${envVars[@]}")" > run.sh
     chmod +x run.sh
     virt-copy-in -a cloudImage.img run.sh /
