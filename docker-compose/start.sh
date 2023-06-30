@@ -28,10 +28,12 @@ function wait_for_process () {
 REG_TOKEN=$(curl -sX POST -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${GH_TOKEN}" https://api.github.com/repos/${GH_OWNER}/${GH_REPOSITORY}/actions/runners/registration-token | jq .token --raw-output)
 
 echo "Starting docker daemon"
-sudo /usr/bin/dockerd &
+sudo sh -c 'sudo /usr/bin/dockerd > dockerd-output 2>&1' &
 echo "Waiting for dockerd to be running"
 if ! wait_for_process "dockerd"; then
     echo "dockerd is not running after max time"
+    echo "This was the output:"
+    cat dockerd-output
     exit 1
 else
     echo "dockerd is running"
